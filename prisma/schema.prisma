@@ -1,0 +1,131 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ServiceType {
+  EXISTING   
+  PROSPECTIVE
+}
+
+model Client {
+  id                   Int @id @default(autoincrement())            
+  name                 String 
+  client_code          String
+  is_delete            String @default("No")
+  client_details       ClientDetails?
+  created_at           DateTime @default(now())
+  updated_at           DateTime @updatedAt 
+  activity             ActivityLog[]
+  hashedRt             String?
+}
+
+model ClientDetails {
+  id                   Int @id @default(autoincrement())
+  incorporation_date   DateTime 
+  fee                  Int 
+  from_date            DateTime
+  to_date              DateTime 
+  pan                  String
+  gstn                 String
+  tin                  String
+  cin                  String
+  std                  String
+  land_line            String
+  website              String
+  job_code             String 
+  status               ServiceType
+  category_id          Int 
+  category             Category @relation(fields: [category_id], references: [id])
+  job_department_id    Int
+  job_department       JobDepartment @relation(fields: [job_department_id], references: [id])
+  department_id        Int
+  department           Department @relation(fields: [department_id], references: [id])
+  client_id            Int @unique
+  client               Client @relation(fields: [client_id], references: [id])
+  admin_email          String
+  admin_first_name     String
+  admin_last_name      String
+  admin_middle_name    String 
+  admin_mobile_number  String
+  is_delete            String  @default("No")
+  locations            Location[]
+  created_at           DateTime @default(now())
+  updated_at           DateTime @updatedAt
+}
+
+model Location {
+  id                   Int @id @default(autoincrement())
+  address_1            String
+  address_2            String
+  location             String
+  location_type        String
+  pincode              Int
+  city                 String
+  state                String
+  country              String
+  client_details_id    Int 
+  client_details       ClientDetails @relation(fields: [client_details_id], references: [id])
+  is_delete            String   @default("No")
+  created_at           DateTime @default(now())
+  updated_at           DateTime @updatedAt
+}
+
+model Employee {
+  id                   Int @id @default(autoincrement())
+  email                String @unique
+  first_name           String
+  last_name            String
+  middle_name          String
+  mobile_number        String 
+  client_details_id    Int
+}
+
+model JobCode {
+  id                  Int @id @default(autoincrement())
+  name                String
+  description         String 
+  job_department_id   Int
+  job_department      JobDepartment @relation(fields: [job_department_id], references: [id])
+}
+
+
+model JobDepartment {
+  id                  Int @id @default(autoincrement())
+  name                String
+  job_department_code String
+  activity_code       String 
+  client_details      ClientDetails[]
+  job_codes           JobCode[]
+}
+
+
+model Department {
+  id                  Int @id @default(autoincrement())
+  name                String
+  description         String 
+  client_details      ClientDetails[]
+}
+
+model Category {
+  id                  Int @id @default(autoincrement())
+  name                String
+  description         String 
+  client_details      ClientDetails[]
+}
+
+model ActivityLog {
+  id                 Int @id @default(autoincrement())
+  client_id          Int 
+  client             Client @relation(fields: [client_id], references: [id])
+  operation          String
+  time_stamp         DateTime
+  status             Int
+}
